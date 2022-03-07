@@ -28,3 +28,8 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     created_at: datetime
+
+# defining schemas for user login
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

@@ -1,5 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 # defining a base schema for client input
 class PostBase(BaseModel):
@@ -33,3 +35,11 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+# schemas for validating access token input and output
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None

@@ -72,6 +72,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     token = verify_access_token(token, credentials_exceptions)
     cursor.execute("""SELECT id, email, created_at FROM users WHERE id = %s """, (token.id, ))
     user = cursor.fetchone()
-    print(user)
 
+    # returns a dict with user_id, email etc
     return user

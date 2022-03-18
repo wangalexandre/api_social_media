@@ -20,6 +20,8 @@ class PostCreate(PostBase):
 class Post(PostBase):
     id: int
     created_at: datetime
+    user_id: int
+    email: EmailStr
 
 # defining a base model schema for user creation
 class UserCreate(BaseModel):

@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from .routers import post, user, auth
+from .config import settings
 
+print(settings.database_hostname)
 
 app = FastAPI()
 

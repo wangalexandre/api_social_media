@@ -1,9 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter
-from sqlite3 import Cursor
 from .. import schemas, utils
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+from ..database import conn, cursor
 
 # defining router to be referenced in main.py
 # Prefix is used to shorten path in path operations
@@ -12,19 +9,6 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
-
-# connecting to database
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='fastapi_social_media', user='postgres', 
-        password='admin', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print('Database connection was successful')
-        break
-    except Exception as error:
-        print('Connecting to database failed')
-        print('Error: ', error)
-        time.sleep(2)
 
 
 # create new user
@@ -50,7 +34,7 @@ def create_user(user: schemas.UserCreate):
 # retrieve user based on id
 @router.get('/{id}', response_model=schemas.UserOut)
 def get_user(id: int):
-    cursor.execute("""SELECT * FROM users WHERE id = %s """, (str(id)))
+    cursor.execute("""SELECT * FROM users WHERE id = %s """, (str(id), ))
     user = cursor.fetchone()
     
     if not user:

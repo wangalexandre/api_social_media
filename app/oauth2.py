@@ -4,24 +4,9 @@ from datetime import date, datetime, timedelta
 from . import schemas
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+from .database import cursor
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
-
-# connecting to database
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='fastapi_social_media', user='postgres', 
-        password='admin', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print('Database connection was successful')
-        break
-    except Exception as error:
-        print('Connecting to database failed')
-        print('Error: ', error)
-        time.sleep(2)
 
 
 # SECRET_KEY

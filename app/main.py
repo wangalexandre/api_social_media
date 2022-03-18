@@ -1,14 +1,4 @@
-# from enum import auto
-# from sqlite3 import Cursor
 from fastapi import FastAPI
-# from fastapi.params import Body
-# from pydantic import BaseModel
-# from typing import Optional, List
-# from random import randrange
-# import psycopg2
-# from psycopg2.extras import RealDictCursor
-# import time
-# from . import schemas, utils
 from .routers import post, user, auth
 
 

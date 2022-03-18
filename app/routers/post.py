@@ -1,29 +1,12 @@
 from fastapi import FastAPI, Response, status, HTTPException, APIRouter, Depends
-from sqlite3 import Cursor
 from .. import schemas, oauth2
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+from ..database import conn, cursor
 from typing import List, Optional
 
 router = APIRouter(
     prefix="/posts",
     tags=["Posts"]
 )
-
-# connecting to database
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='fastapi_social_media', user='postgres', 
-        password='admin', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print('Database connection was successful')
-        break
-    except Exception as error:
-        print('Connecting to database failed')
-        print('Error: ', error)
-        time.sleep(2)
-
 
 # get all posts stored in db
 # current user is defined as int type but doesn't really matter as it will return a dictionary either way
@@ -112,9 +95,10 @@ def delete_post(id: int, current_user: int = Depends(oauth2.get_current_user)):
 
 
 # update post based on id
-@router.put('/{id}', response_model=schemas.Post)
+@router.put('/{id}', response_model=schemas.PostBase)
 def update_post(id: int, post: schemas.PostCreate, current_user: int = Depends(oauth2.get_current_user)):
-    cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """, (post.title, post.content, post.published, str(id)))
+    cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """, 
+    (post.title, post.content, post.published, str(id)))
     updated_post = cursor.fetchone()
 
     if updated_post == None:

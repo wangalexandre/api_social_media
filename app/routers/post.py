@@ -10,16 +10,18 @@ router = APIRouter(
 
 # get all posts stored in db
 # current user is defined as int type but doesn't really matter as it will return a dictionary either way
-@router.get('/', response_model=List[schemas.Post])
+@router.get('/', response_model=List[schemas.PostOut])
 def get_posts(current_user: int = Depends(oauth2.get_current_user), 
                 limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     # print(current_user['email'])
     # cursor.execute allows you to use raw SQL
     cursor.execute("""
-                    SELECT p.*, u.id, u.email, u.created_at 
-                    FROM public.posts p 
-                    JOIN public.users u ON p.user_id = u.id
-                    WHERE (%s IS NULL OR p.title LIKE %s)
+                    SELECT posts.*, users.id, users.email, users.created_at, COUNT(votes.post_id) AS vote_count
+                    FROM public.posts 
+                    LEFT JOIN public.users ON posts.user_id = users.id
+					LEFT JOIN public.votes ON posts.id = votes.post_id
+                    WHERE (%s IS NULL OR posts.title LIKE %s)
+                    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
                     LIMIT %s OFFSET %s
                     """, (search, f'%{search}%', limit, skip))
 
@@ -46,7 +48,7 @@ def create_posts(post: schemas.PostCreate, current_user: int = Depends(oauth2.ge
     cursor.execute("""
                     SELECT p.*, u.id, u.email, u.created_at 
                     FROM public.posts p 
-                    JOIN public.users u ON p.user_id = u.id
+                    LEFT JOIN public.users u ON p.user_id = u.id
                     WHERE p.id = %s
                     """, (new_post['id'], ))
     new_post_with_id = cursor.fetchone()
@@ -58,15 +60,18 @@ def create_posts(post: schemas.PostCreate, current_user: int = Depends(oauth2.ge
 
 
 # retrieve a specific post based on id - path parameter
-@router.get('/{id}', response_model=schemas.Post)
+@router.get('/{id}', response_model=schemas.PostOut)
 # specifying that the id input should be an integer to validate user input
 def get_post(id: int, current_user: int = Depends(oauth2.get_current_user)):
     # need to convert id to str to make sure SQL query interprets it, cannot interpret integer
     cursor.execute("""
-                        SELECT p.*, u.id, u.email, u.created_at 
-                        FROM public.posts p JOIN public.users u 
-                        ON p.user_id = u.id 
-                        WHERE p.id = %s """, (str(id), ))
+                        SELECT posts.*, users.id, users.email, users.created_at, COUNT(post_id) AS vote_count 
+                        FROM public.posts
+                        LEFT JOIN public.users ON posts.user_id = users.id
+                        LEFT JOIN public.votes ON posts.id = votes.post_id 
+                        WHERE posts.id = %s
+                        GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9 """, 
+                        (str(id), ))
     post = cursor.fetchone()
     
     if not post:

@@ -23,6 +23,10 @@ class Post(PostBase):
     user_id: int
     email: EmailStr
 
+# out schema with vote count
+class PostOut(Post):
+    vote_count: int
+
 # defining a base model schema for user creation
 class UserCreate(BaseModel):
     email: EmailStr
@@ -45,3 +49,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str] = None
+
+
+class Vote(BaseModel):
+    post_id: int
+    dir: bool
